@@ -2,4 +2,4 @@
 based on several electronic projects
 
 # Nodes
-  - alarm circuit: codes and image of project
+  - alarm circuit: codes and image of project using optoelectronic
