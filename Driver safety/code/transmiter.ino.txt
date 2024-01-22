@@ -1,0 +1,63 @@
+#include <SPI.h> //Library for using SPI Communication
+#include <Servo.h> //Library for using servo motor
+#include <mcp2515.h> //library for using mcp2515 CAN bus module
+Servo myservo;  // create servo object to control a servo
+
+struct can_frame canMsg;
+MCP2515 mcp2515(10);
+
+int ledPin = 6; // LED connected to digital pin 13
+int inPin = 7;   // pushbutton connected to digital pin 7
+int IR_out = 3;
+bool val = true;     // variable to store the read value
+int transmitted_val=0;
+
+void setup()
+{
+  pinMode(ledPin, OUTPUT);      
+  pinMode(inPin, INPUT);     
+  pinMode(IR_out, INPUT);
+  
+  myservo.attach(9);
+  Serial.begin(9600);
+
+  mcp2515.reset();
+  mcp2515.setBitrate(CAN_500KBPS, MCP_8MHZ); //Sets CAN at speed 500KBPS and Clock 8MHz
+  mcp2515.setNormalMode();
+  canMsg.can_id = 0xAA; //CAN id as 0xAA
+  canMsg.can_dlc = 1; //CAN data length as 1
+}
+
+void loop()
+{
+  
+
+  if(digitalRead(inPin))
+ {
+  
+ val=!val;
+    if(val)
+  {
+  digitalWrite(ledPin, 1);
+  myservo.write(0);                  // sets the servo position according to the scaled value
+  delay(15);
+  
+  
+  }else
+  {
+  digitalWrite(ledPin, 0);
+  myservo.write(90);
+ delay(15);   
+  }
+  delay(200);
+  }
+  transmitted_val=digitalRead(IR_out);
+  Serial.print(transmitted_val);
+  
+  
+
+  canMsg.data[0] = !transmitted_val; //Update humidity value in [0]
+
+ mcp2515.sendMessage(&canMsg);
+ delay(200);
+}
